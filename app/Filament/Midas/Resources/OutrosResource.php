@@ -16,28 +16,19 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class OutrosResource extends Resource
 {
     protected static ?string $model = Outros::class;
-
     protected static ?string $navigationLabel = 'Outros Órgãos';
-
     protected static ?string $navigationGroup = 'Call Center';
-
     protected static ?string $navigationIcon = 'heroicon-s-phone-arrow-up-right';
-
     protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
-        $user = auth()->user()->hasRole(Utils::getSuperAdminName());
-        $users = User::where(function ($query) use ($user) {
-            $user ? $query->whereNotIn('id', [1,2,9,10]) : $query->whereNotIn('id', [1,2,9,10])->where('id', auth()->id());
-        })->get()->pluck('name', 'id');
-
         return $form
             ->schema([
                 Forms\Components\Section::make([
                     Forms\Components\Select::make('user_id')
-                        ->options($users)
-                        ->default($user ? null : auth()->id()),
+                        ->relationship('user', 'name', modifyQueryUsing: fn(Builder $query) => $query->whereId(auth()->user()->id))
+                        ->default(auth()->user()->id()),
                     Forms\Components\Select::make('status_id')
                         ->relationship('status', 'status')
                         ->default(1),

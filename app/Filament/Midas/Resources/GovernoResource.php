@@ -2,16 +2,18 @@
 
 namespace App\Filament\Midas\Resources;
 
+use Filament\Forms;
+use App\Models\User;
+use Filament\Tables;
+use App\Models\Governo;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
+use BezhanSalleh\FilamentShield\Support\Utils;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Midas\Resources\GovernoResource\Pages;
 use App\Filament\Midas\Resources\GovernoResource\RelationManagers;
-use App\Models\Governo;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class GovernoResource extends Resource
 {
@@ -34,7 +36,8 @@ class GovernoResource extends Resource
             ->schema([
                 Forms\Components\Section::make([
                     Forms\Components\Select::make('user_id')
-                        ->options($users)
+                        ->relationship('user', 'name', modifyQueryUsing: fn(Builder $query) => $query->whereId(auth()->id()))
+                        ->selectablePlaceholder(false)
                         ->default($user ? null : auth()->id()),
                     Forms\Components\Select::make('status_id')
                         ->relationship('status', 'status')

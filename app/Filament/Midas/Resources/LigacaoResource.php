@@ -18,7 +18,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class LigacaoResource extends Resource
 {
     protected static ?string $model = Ligacao::class;
-
+    protected static ?string $modelLabel = 'Geral';
+    protected static ?string $pluralModelLabel = 'Lista geral';
     protected static ?int $navigationSort = 0;
 
     protected static ?string $navigationLabel = 'Geral';

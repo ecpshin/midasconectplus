@@ -38,7 +38,6 @@ class UserResource extends Resource
                         ->minLength(8)
                         ->maxLength(16)
                         ->revealable()
-                        ->visibleOn('create')
                         ->dehydrateStateUsing(fn(string $state): string => Hash::make($state)  )
                         ->dehydrated(fn(?string $state): bool => filled($state))
                         ->required(fn(string $operation): bool => $operation === 'create'),
@@ -50,7 +49,6 @@ class UserResource extends Resource
                         ->maxLength(16)
                         ->revealable()
                         ->dehydrated(false)
-                        ->visibleOn('create')
                         ->required(fn(string $operation) => $operation === 'create'),
                 ])->visibleOn('create'),
                 Forms\Components\Section::make([
