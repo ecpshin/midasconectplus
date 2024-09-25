@@ -2,15 +2,16 @@
 
 namespace App\Filament\Admin\Resources;
 
+use Filament\Forms;
+use App\Models\User;
+use Filament\Tables;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Hash;
+use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
-use App\Models\User;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 
 class UserResource extends Resource
 {
@@ -27,15 +28,33 @@ class UserResource extends Resource
                 Forms\Components\Section::make([
                     Forms\Components\TextInput::make('name')->label('Nome')->required(),
                     Forms\Components\TextInput::make('email')
-                        ->label('Email')
-                        ->unique(ignoreRecord: true)->required(),
+                    ->label('Email')
+                    ->unique(ignoreRecord: true)->required(),
+                ]),
+                Forms\Components\Section::make([
                     Forms\Components\TextInput::make('password')
                         ->label('Senha')
                         ->password()
                         ->minLength(8)
                         ->maxLength(16)
                         ->revealable()
-                        ->required(),
+                        ->visibleOn('create')
+                        ->dehydrateStateUsing(fn(string $state): string => Hash::make($state)  )
+                        ->dehydrated(fn(?string $state): bool => filled($state))
+                        ->required(fn(string $operation): bool => $operation === 'create'),
+                    Forms\Components\TextInput::make('password_confirm')
+                        ->label('Confirme a Senha')
+                        ->password()
+                        ->same('password')
+                        ->minLength(8)
+                        ->maxLength(16)
+                        ->revealable()
+                        ->dehydrated(false)
+                        ->visibleOn('create')
+                        ->required(fn(string $operation) => $operation === 'create'),
+                ])->visibleOn('create'),
+                Forms\Components\Section::make([
+
                     Forms\Components\Select::make('roles')
                         ->relationship('roles', 'name')
                         ->multiple()
