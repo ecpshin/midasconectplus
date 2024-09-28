@@ -18,10 +18,8 @@ class OutrosResource extends Resource
 {
     protected static ?string $model = Outros::class;
     protected static ?string $navigationLabel = 'Outros Órgãos';
-
-    protected static ?string $navigationGroup = 'Call Center';
-
     protected static ?string $navigationIcon = 'heroicon-s-phone-arrow-up-right';
+    protected static ?string $navigationGroup = 'Call Center';
 
     public static function form(Form $form): Form
     {

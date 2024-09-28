@@ -19,7 +19,7 @@ class SituacaoResource extends Resource
     protected static ?string $modelLabel = 'Situação';
     protected static ?string $pluralModelLabel = 'Situações';
     protected static ?string $navigationLabel = 'Situação';
-    protected static ?string $navigationGroup = 'Auxiliares';
+    protected static ?string $navigationGroup = 'Dependências';
     protected static ?string $navigationIcon = 'heroicon-s-exclamation-triangle';
 
     public static function form(Form $form): Form

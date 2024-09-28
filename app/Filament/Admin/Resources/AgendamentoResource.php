@@ -17,7 +17,10 @@ class AgendamentoResource extends Resource
 {
     protected static ?string $model = Agendamento::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?string $navigationIcon = 'icon-calendar-event';
+    protected static ?int $navigationSort = 0;
+    protected static ?string $navigationGroup = "Call Center";
 
     public static function form(Form $form): Form
     {

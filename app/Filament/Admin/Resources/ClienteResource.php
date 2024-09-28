@@ -2,12 +2,16 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Enums\TipoContaEnum;
 use App\Filament\Resources\ClienteResource\Pages;
 use App\Filament\Resources\ClienteResource\RelationManagers;
 use App\Models\Cliente;
 use App\Models\EstadoCivil;
+use App\Models\Organizacao;
+use App\Services\BuscasApiService;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -34,7 +38,7 @@ class ClienteResource extends Resource
                             ->required()
                             ->maxLength(50),
                         Forms\Components\DatePicker::make('data_nascimento'),
-                    ])->columns(['xl'=>2]),
+                    ])->columns(['xl' => 2]),
 
                     Forms\Components\Group::make([
                         Forms\Components\TextInput::make('rg')
@@ -64,8 +68,8 @@ class ClienteResource extends Resource
                             ->createOptionForm([
                                 Forms\Components\TextInput::make('estado_civil')
                             ])->createOptionUsing(function (array $data): string {
-                               $estado = EstadoCivil::create($data);
-                               return $estado->get('estado_civil');
+                                $estado = EstadoCivil::create($data);
+                                return $estado->get('estado_civil');
                             }),
                     ])->columnSpan(['xl' => 'full'])->columns(['xl' => 4]),
 
@@ -102,14 +106,127 @@ class ClienteResource extends Resource
 
                 Forms\Components\Section::make('Dados Residenciais')->schema([
                     Forms\Components\Repeater::make('residenciais')->schema([
-                      Forms\Components\TextInput::make('cep'),
-                      Forms\Components\TextInput::make('logradouro'),
-                      Forms\Components\TextInput::make('complemento'),
-                      Forms\Components\TextInput::make('bairro'),
-                      Forms\Components\TextInput::make('localidade'),
-                      Forms\Components\TextInput::make('uf'),
-                    ])->columns(['xl' => 3]),
-                ])->collapsible()
+                        Forms\Components\Group::make([
+                            Forms\Components\TextInput::make('cep')
+                                ->mask('99999-999')
+                                ->required()
+                                ->maxLength(9)
+                                ->suffixAction(fn($state, $set) => Forms\Components\Actions\Action::make('search-action')
+                                    ->icon('heroicon-o-magnifying-glass')
+                                    ->action(function () use ($state, $set) {
+                                        if (blank($state)) {
+                                            Notification::make()
+                                                ->title('Digite um CEP para buscar o endereço')
+                                                ->danger()
+                                                ->send();
+                                            return;
+                                        }
+
+                                        $dataCep = BuscasApiService::buscaCep($state);
+
+                                        $set('logradouro', $dataCep['street']);
+                                        $set('bairro', $dataCep['neighborhood']);
+                                        $set('localidade', $dataCep['city']);
+                                        $set('uf', $dataCep['state']);
+                                    })),
+                            Forms\Components\TextInput::make('logradouro')
+                                ->maxLength(255)
+                                ->columnSpan(['lg' => 2]),
+                            Forms\Components\TextInput::make('complemento')
+                                ->maxLength(100)
+                                ->columnSpan(['lg' => 2]),
+                        ])->columnSpanFull()->columns(['lg' => 5]),
+                        Forms\Components\Group::make([
+                            Forms\Components\TextInput::make('bairro')
+                                ->maxLength(100)
+                                ->columnSpan(['lg' => 2]),
+                            Forms\Components\TextInput::make('localidade')
+                                ->maxLength(100)
+                                ->columnSpan(['lg' => 2]),
+                            Forms\Components\TextInput::make('uf')
+                                ->maxLength(2)
+                        ])->columnSpanFull()->columns(['lg' => 5])
+                    ]),
+                ])->collapsible()->collapsible(),
+
+                Forms\Components\Section::make('Dados bancários')->schema([
+                    Forms\Components\Repeater::make('bancarias')->schema([
+                        Forms\Components\Group::make([
+                            Forms\Components\TextInput::make('codigo')
+                                ->required()
+                                ->maxLength(50)
+                                ->suffixAction(
+                                    fn($state, $set) => Forms\Components\Actions\Action::make('search-action')
+                                        ->icon('heroicon-o-magnifying-glass')
+                                        ->action(
+                                            function () use ($state, $set) {
+                                                if(blank($state)){
+                                                    Notification::make()
+                                                        ->title('Digite o código para buscar o banco')
+                                                        ->danger()
+                                                        ->send();
+                                                    return;
+                                                }
+
+                                                $dataBank = BuscasApiService::buscaBanco($state);
+
+                                                if(key_exists('message', $dataBank))
+                                                {
+                                                    Notification::make()->title($dataBank['message'])
+                                                        ->danger()
+                                                        ->send();
+                                                } else {
+                                                    $set('banco', strtoupper($dataBank['fullName']));
+                                                }
+                                            }
+                                        )
+                                ),
+                            Forms\Components\TextInput::make('banco')
+                                ->columnSpan(['lg' => 2])
+                                ->maxLength(255),
+                            Forms\Components\TextInput::make('agencia'),
+                            Forms\Components\TextInput::make('conta')
+                        ])->columns(['lg' => 5]),
+                        Forms\Components\Group::make([
+                            Forms\Components\Select::make('tipo')
+                                ->options(TipoContaEnum::class)
+                                ->default('Conta Corrente'),
+                            Forms\Components\Select::make('operacao')
+                                ->options([
+                                    'Crédito em Conta' => 'Credito em Conta',
+                                    'Débito em Conta' => 'Débito em Conta',
+                                    'Ordem de Pagamento' => 'Ordem de Pagamento',
+                                    'PIX' => 'PIX',
+                                    'TED' => 'TED',
+                                ]),
+                            Forms\Components\TextInput::make('chave_pix')
+                                ->label('Chave PIX'),
+                        ])->columns(['lg' => 3]),
+                ])->collapsible(),
+
+            ])->collapsible()->collapsed(),
+
+                Forms\Components\Section::make('Dados Funcionais')->schema([
+                    Forms\Components\Repeater::make('funcionais')->schema([
+                        Forms\Components\Group::make([
+                            Forms\Components\Select::make('organizacao_id')
+                                ->options(Organizacao::all()->pluck('nome_organizacao', 'nome_organizacao'))
+                                ->searchable()
+                                ->preload()
+                                ->columnSpan(['lg' => 3]),
+                            Forms\Components\TextInput::make('nrbeneficio')
+                                ->label('Benefício|Matrícula')
+                                ->maxLength(255),
+                            Forms\Components\TextInput::make('email')
+                                ->email()
+                                ->maxLength(255)
+                                ->default('cliente@email.com'),
+                            Forms\Components\TextInput::make('senha')
+                                ->label('Senha de acesso')
+                                ->default('Não possui.'),
+                        ])->columns(['lg' => 3]),
+                    ])
+                ])->collapsible()->collapsed(),
             ]);
     }
 
@@ -149,17 +266,13 @@ class ClienteResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->modifyQueryUsing(fn(Builder $query) => $query->orderByDesc('id'))
-            ;
+            ->modifyQueryUsing(fn(Builder $query) => $query->orderByDesc('id'));
     }
 
     public static function getRelations(): array
     {
         return [
-            \App\Filament\Admin\Resources\ClienteResource\RelationManagers\PropostaRelationManager::class,
-            \App\Filament\Admin\Resources\ClienteResource\RelationManagers\InfoResidencialRelationManager::class,
-            \App\Filament\Admin\Resources\ClienteResource\RelationManagers\InfoBancariasRelationManager::class,
-            \App\Filament\Admin\Resources\ClienteResource\RelationManagers\VinculosRelationManager::class
+            \App\Filament\Admin\Resources\ClienteResource\RelationManagers\PropostaRelationManager::class
         ];
     }
 

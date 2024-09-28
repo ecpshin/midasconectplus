@@ -17,7 +17,7 @@ class StatusResource extends Resource
     protected static ?string $slug = 'status';
     protected static ?string $modelLabel = 'Status';
     protected static ?string $navigationLabel = 'Status';
-    protected static ?string $navigationGroup = 'Auxiliares';
+    protected static ?string $navigationGroup = 'Dependências';
 
     protected static ?string $navigationIcon = 'heroicon-o-flag';
 

@@ -16,10 +16,10 @@ use App\Filament\Resources\UserResource\RelationManagers;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
+    protected static ?string $modelLabel = 'Usuário';
+    protected static ?string $navigationIcon = 'icon-users-cog-solid';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    protected static ?string $navigationGroup = 'Midas';
+    protected static ?string $navigationGroup = 'Configurações';
 
     public static function form(Form $form): Form
     {
@@ -67,7 +67,8 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->label('Nome'),
+                TextColumn::make('name')->label('Nome')
+                ->searchable(),
                 TextColumn::make('email')->label('Email'),
                 TextColumn::make('roles.name')->label('Função'),
             ])

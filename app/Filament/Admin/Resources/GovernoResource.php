@@ -17,10 +17,8 @@ use Illuminate\Database\Eloquent\Builder;
 class GovernoResource extends Resource
 {
     protected static ?string $model = Governo::class;
-
-    protected static ?string $navigationGroup = 'Call Center';
-
     protected static ?string $navigationIcon = 'heroicon-s-phone-arrow-up-right';
+    protected static ?string $navigationGroup = 'Call Center';
 
     public static function form(Form $form): Form
     {

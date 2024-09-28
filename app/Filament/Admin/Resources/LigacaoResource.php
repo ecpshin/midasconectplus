@@ -23,9 +23,9 @@ class LigacaoResource extends Resource
     protected static ?string $slug = 'ligacoes';
     protected static ?string $modelLabel = 'Ligação';
     protected static ?string $pluralModelLabel = 'Ligações';
-    protected static ?string $navigationGroup = 'Call Center';
     protected static ?string $navigationLabel = 'Ligações Realizadas';
     protected static ?string $navigationIcon = 'heroicon-s-phone-arrow-up-right';
+    protected static ?string $navigationGroup = 'Call Center';
 
     public static function form(Form $form): Form
     {

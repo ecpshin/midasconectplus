@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('tabelas', function (Blueprint $table) {
-            $table->string('descricao_codigo')->virtualAs('CONCAT(descricao,\' - \', codigo)');
+        Schema::create('sexos', function (Blueprint $table) {
+            $table->id();
+            $table->string('sexo');
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('tabelas', function (Blueprint $table) {
-            $table->dropColumn('descricao_codigo');
-        });
+        Schema::dropIfExists('sexos');
     }
 };

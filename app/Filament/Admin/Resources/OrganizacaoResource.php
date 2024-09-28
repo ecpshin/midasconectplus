@@ -14,11 +14,11 @@ use Filament\Tables\Table;
 class OrganizacaoResource extends Resource
 {
     protected static ?string $slug = 'orgaos';
-
     protected static ?string $model = Organizacao::class;
+    protected static ?string $modelLabel = 'Orgão';
     protected static ?string $pluralModelLabel = 'Orgãos';
-    protected static ?string $navigationGroup = 'Auxiliares';
-    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
+    protected static ?string $navigationIcon = 'icon-buildings';
+    protected static ?string $navigationGroup = 'Dependências';
 
     public static function form(Form $form): Form
     {

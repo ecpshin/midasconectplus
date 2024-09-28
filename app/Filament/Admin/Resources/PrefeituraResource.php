@@ -17,10 +17,9 @@ use Illuminate\Database\Eloquent\Builder;
 class PrefeituraResource extends Resource
 {
     protected static ?string $model = Prefeitura::class;
-
-    protected static ?string $navigationGroup = 'Call Center';
-
     protected static ?string $navigationIcon = 'heroicon-s-phone-arrow-up-right';
+    protected static ?string $modelLabel = 'Prefeitura';
+    protected static ?string $navigationGroup = 'Call Center';
 
     public static function form(Form $form): Form
     {

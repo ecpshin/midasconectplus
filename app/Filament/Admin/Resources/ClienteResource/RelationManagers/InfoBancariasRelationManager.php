@@ -19,52 +19,58 @@ class InfoBancariasRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('codigo')
-                    ->required()
-                    ->maxLength(50)
-                    ->suffixAction(
-                        fn($state, $set) => Forms\Components\Actions\Action::make('search-action')
-                            ->icon('heroicon-o-magnifying-glass')
-                            ->action(
-                                function () use ($state, $set) {
-                                    if(blank($state)){
-                                        Notification::make()
-                                            ->title('Digite o código para buscar o banco')
-                                            ->danger()
-                                            ->send();
-                                        return;
-                                    }
+                Forms\Components\Group::make([
+                    Forms\Components\TextInput::make('codigo')
+                        ->required()
+                        ->maxLength(50)
+                        ->suffixAction(
+                            fn($state, $set) => Forms\Components\Actions\Action::make('search-action')
+                                ->icon('heroicon-o-magnifying-glass')
+                                ->action(
+                                    function () use ($state, $set) {
+                                        if(blank($state)){
+                                            Notification::make()
+                                                ->title('Digite o código para buscar o banco')
+                                                ->danger()
+                                                ->send();
+                                            return;
+                                        }
 
-                                    $dataBank = BuscasApiService::buscaBanco($state);
+                                        $dataBank = BuscasApiService::buscaBanco($state);
 
-                                    if(key_exists('message', $dataBank))
-                                    {
-                                        Notification::make()->title($dataBank['message'])
-                                            ->danger()
-                                            ->send();
-                                    } else {
-                                        $set('banco', strtoupper($dataBank['fullName']));
+                                        if(key_exists('message', $dataBank))
+                                        {
+                                            Notification::make()->title($dataBank['message'])
+                                                ->danger()
+                                                ->send();
+                                        } else {
+                                            $set('banco', strtoupper($dataBank['fullName']));
+                                        }
                                     }
-                                }
-                            )
-                    ),
-                Forms\Components\TextInput::make('banco')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('agencia'),
-                Forms\Components\TextInput::make('conta')
-                    ->maxLength(50),
-                Forms\Components\Select::make('tipo')
-                    ->options(TipoContaEnum::class)
-                    ->default('Conta Corrente'),
-                Forms\Components\Select::make('operacao')
-                    ->options([
-                        'Crédito em Conta' => 'Credito em Conta',
-                        'Débito em Conta' => 'Débito em Conta',
-                        'Ordem de Pagamento' => 'Ordem de Pagamento',
-                        'PIX' => 'PIX',
-                        'TED' => 'TED',
-                    ]),
-            ]);
+                                )
+                        ),
+                    Forms\Components\TextInput::make('banco')
+                        ->columnSpan(['lg' => 2])
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('agencia'),
+                    Forms\Components\TextInput::make('conta')
+                ])->columns(['lg' => 5]),
+                Forms\Components\Group::make([
+                    Forms\Components\Select::make('tipo')
+                        ->options(TipoContaEnum::class)
+                        ->default('Conta Corrente'),
+                    Forms\Components\Select::make('operacao')
+                        ->options([
+                            'Crédito em Conta' => 'Credito em Conta',
+                            'Débito em Conta' => 'Débito em Conta',
+                            'Ordem de Pagamento' => 'Ordem de Pagamento',
+                            'PIX' => 'PIX',
+                            'TED' => 'TED',
+                        ]),
+                    Forms\Components\TextInput::make('chave_pix')
+                        ->label('Chave PIX'),
+                    ])->columns(['lg' => 3]),
+            ])->columns(1);
     }
 
     public function table(Table $table): Table

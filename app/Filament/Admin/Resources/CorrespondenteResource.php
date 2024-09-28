@@ -14,9 +14,8 @@ use Filament\Tables\Table;
 class CorrespondenteResource extends Resource
 {
     protected static ?string $model = Correspondente::class;
-
-    protected static ?string $navigationGroup = 'Essenciais';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Dependências';
+    protected static ?string $navigationIcon = 'icon-handshake-regular';
 
     public static function form(Form $form): Form
     {
