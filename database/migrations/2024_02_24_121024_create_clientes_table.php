@@ -1,5 +1,6 @@
 Cliente<?php
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -29,7 +30,11 @@ return new class extends Migration
             $table->string('phone3', 50)->nullable()->default('(84)9 9999-9999');
             $table->string('phone4', 50)->nullable()->default('(84)9 9999-9999');
             $table->foreignId('user_id')->constrained('users', 'id');
+            $table->json('bancarias')->nullable();
+            $table->json('funcionais')->nullable();
+            $table->json('residenciais')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

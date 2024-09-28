@@ -26,6 +26,7 @@ return new class extends Migration
             $table->decimal('percentual_corretor', 20, 2);
             $table->string('referencia')->nullable()->default('L');
             $table->boolean('parcelado')->nullable()->default(false);
+            $table->string('descricao_codigo')->virtualAs('CONCAT(\' < \',codigo,\' > < \',descricao,\' > < \',prazo, \' >\')')->after('percentual_corretor');
             $table->timestamps();
             $table->softDeletes();
         });

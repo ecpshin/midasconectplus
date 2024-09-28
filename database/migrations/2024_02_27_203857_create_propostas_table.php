@@ -22,13 +22,16 @@ return new class extends Migration
             $table->decimal('total_proposta', 20, 2)->nullable();
             $table->decimal('parcela_proposta', 20, 2)->nullable();
             $table->decimal('liquido_proposta', 20, 2)->nullable();
-            $table->foreignId('cliente_id')->constrained('clientes', 'id')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreignId('produto_id')->constrained('produtos', 'id')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreignId('financeira_id')->constrained('financeiras', 'id')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreignId('correspondente_id')->constrained('correspondentes', 'id')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreignId('situacao_id')->constrained('situacoes', 'id')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreignId('user_id')->constrained('users', 'id')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreignId('cliente_id')->constrained('clientes', 'id')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('produto_id')->constrained('produtos', 'id')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('financeira_id')->constrained('financeiras', 'id')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('correspondente_id')->constrained('correspondentes', 'id')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('situacao_id')->constrained('situacoes', 'id')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('organizacao_id')->constrained('organizacoes', 'id')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('tabela_id')->constrained('tabelas', 'id')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users', 'id')->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
