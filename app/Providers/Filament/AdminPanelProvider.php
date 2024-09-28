@@ -65,19 +65,20 @@ class AdminPanelProvider extends PanelProvider
                     ->url(fn (): string => EditProfilePage::getUrl())
                     ->icon('heroicon-m-user-circle')
 
-            ])->plugins([
+            ])
+            ->plugins([
                 FilamentShieldPlugin::make(),
                 FilamentEditProfilePlugin::make()
                     ->setIcon('heroicon-s-identification')
-                    ->setNavigationGroup('Perfil')
-                    ->setSort(-1)
+                    ->setNavigationGroup('Configurações')
+                    ->setSort(100)
                     ->shouldShowAvatarForm(
                         value: true,
                         directory: 'avatars',
                         rules: 'mimes:jpeg,png|max:8192'
                     ),
-            ])
-            ->maxContentWidth('full')
-            ->sidebarFullyCollapsibleOnDesktop();
+            ])->sidebarFullyCollapsibleOnDesktop()
+            ->maxContentWidth('full');
+
     }
 }

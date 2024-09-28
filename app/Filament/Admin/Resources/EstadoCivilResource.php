@@ -15,10 +15,8 @@ use Filament\Tables\Table;
 class EstadoCivilResource extends Resource
 {
     protected static ?string $model = EstadoCivil::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    protected static ?string $navigationGroup = 'Auxiliares';
+    protected static ?string $navigationGroup = 'Dependências';
     public static function form(Form $form): Form
     {
         return $form

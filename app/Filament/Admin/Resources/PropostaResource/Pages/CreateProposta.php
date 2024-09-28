@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\PropostaResource\Pages;
 
 use App\Filament\Admin\Resources\PropostaResource;
+use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateProposta extends CreateRecord

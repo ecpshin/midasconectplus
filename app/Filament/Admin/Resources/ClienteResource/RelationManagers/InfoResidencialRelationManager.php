@@ -18,39 +18,46 @@ class InfoResidencialRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('cep')
-                    ->mask('99999-999')
-                    ->required()
-                    ->maxLength(9)
-                    ->suffixAction(fn($state, $set) => Forms\Components\Actions\Action::make('search-action')
-                    ->icon('heroicon-o-magnifying-glass')
-                    ->action(function () use ($state, $set) {
-                        if(blank($state))
-                        {
-                            Notification::make()
-                                ->title('Digite um CEP para buscar o endereço')
-                                ->danger()
-                                ->send();
-                            return;
-                        }
+                Forms\Components\Group::make([
+                    Forms\Components\TextInput::make('cep')
+                        ->mask('99999-999')
+                        ->required()
+                        ->maxLength(9)
+                        ->suffixAction(fn($state, $set) => Forms\Components\Actions\Action::make('search-action')
+                            ->icon('heroicon-o-magnifying-glass')
+                            ->action(function () use ($state, $set) {
+                                if (blank($state)) {
+                                    Notification::make()
+                                        ->title('Digite um CEP para buscar o endereço')
+                                        ->danger()
+                                        ->send();
+                                    return;
+                                }
 
-                        $dataCep = BuscasApiService::buscaCep($state);
+                                $dataCep = BuscasApiService::buscaCep($state);
 
-                        $set('logradouro', $dataCep['street']);
-                        $set('bairro', $dataCep['neighborhood']);
-                        $set('localidade', $dataCep['city']);
-                        $set('uf', $dataCep['state']);
-                    })),
-                Forms\Components\TextInput::make('logradouro')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('complemento')
-                    ->maxLength(100),
-                Forms\Components\TextInput::make('bairro')
-                    ->maxLength(100),
-                Forms\Components\TextInput::make('localidade')
-                    ->maxLength(100),
-                Forms\Components\TextInput::make('uf')
-                    ->maxLength(2)
+                                $set('logradouro', $dataCep['street']);
+                                $set('bairro', $dataCep['neighborhood']);
+                                $set('localidade', $dataCep['city']);
+                                $set('uf', $dataCep['state']);
+                            })),
+                    Forms\Components\TextInput::make('logradouro')
+                        ->maxLength(255)
+                        ->columnSpan(['lg' => 2]),
+                    Forms\Components\TextInput::make('complemento')
+                        ->maxLength(100)
+                        ->columnSpan(['lg' => 2]),
+                ])->columnSpanFull()->columns(['lg' => 5]),
+                Forms\Components\Group::make([
+                    Forms\Components\TextInput::make('bairro')
+                        ->maxLength(100)
+                        ->columnSpan(['lg' => 2]),
+                    Forms\Components\TextInput::make('localidade')
+                        ->maxLength(100)
+                        ->columnSpan(['lg' => 2]),
+                    Forms\Components\TextInput::make('uf')
+                        ->maxLength(2)
+                ])->columnSpanFull()->columns(['lg' => 5])
             ]);
     }
 

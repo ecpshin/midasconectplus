@@ -6,6 +6,7 @@ use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use App\Models\Prefeitura;
+use App\Models\User;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,13 +18,9 @@ use App\Filament\Midas\Resources\PrefeituraResource\RelationManagers;
 class PrefeituraResource extends Resource
 {
     protected static ?string $model = Prefeitura::class;
-
     protected static ?int $navigationSort = 3;
-
     protected static ?string $navigationGroup = 'Call Center';
-
     protected static ?string $navigationIcon = 'heroicon-s-phone-arrow-up-right';
-
     public static function form(Form $form): Form
     {
 
@@ -36,8 +33,9 @@ class PrefeituraResource extends Resource
         ->schema([
             Forms\Components\Section::make([
                 Forms\Components\Select::make('user_id')
-                    ->options($users)
-                    ->default($user ? null : auth()->id()),
+                    ->relationship('user', 'name', modifyQueryUsing: fn(Builder $query) => $query->whereId(auth()->id()))
+                    ->selectablePlaceholder(false)
+                    ->default(auth()->id()),
                 Forms\Components\Select::make('status_id')
                     ->relationship('status', 'status')
                     ->default(1),

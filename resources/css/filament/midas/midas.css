@@ -9,7 +9,7 @@ colors
 */
 
 .fi-sidebar-header {
-    @apply bg-gradient-to-br from-black via-primary-700 to-primary-500 dark:bg-transparent !important;
+    @apply bg-white dark:bg-transparent !important;
 }
 
 .fi-logo {
@@ -25,7 +25,7 @@ colors
 }
 
 .fi-sidebar {
-    @apply bg-gradient-to-br from-black via-primary-500 to-orange-500 dark:bg-transparent !important;
+    @apply bg-gradient-to-br from-15% from-black via-[#6D303B] to-[#443C78] dark:bg-transparent !important;
 }
 
 .fi-sidebar-group div span {
