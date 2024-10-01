@@ -16,4 +16,5 @@ class ListAgendamentos extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
 }

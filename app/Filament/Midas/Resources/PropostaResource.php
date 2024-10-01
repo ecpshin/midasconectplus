@@ -5,10 +5,14 @@ namespace App\Filament\Midas\Resources;
 use App\Filament\Midas\Resources\PropostaResource\Pages;
 use App\Filament\Midas\Resources\PropostaResource\RelationManagers;
 use App\Models\Proposta;
+use App\Models\Tabela;
+use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\Summarizers\Average;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -17,149 +21,232 @@ class PropostaResource extends Resource
 {
     protected static ?string $model = Proposta::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = "Principal";
+    protected static ?int $navigationSort = -1;
+
+    protected static ?string $navigationIcon = 'icon-briefcase-fill';
 
     public static function form(Form $form): Form
     {
+
         return $form
             ->schema([
-                Forms\Components\TextInput::make('uuid')
-                    ->label('UUID')
-                    ->maxLength(50)
-                    ->default('1e85e666-6894-4c83-9d64-0570a61b0991'),
-                Forms\Components\TextInput::make('numero_contrato')
-                    ->maxLength(50)
-                    ->default('Não informado'),
-                Forms\Components\DatePicker::make('data_digitacao'),
-                Forms\Components\DatePicker::make('data_pagamento'),
-                Forms\Components\TextInput::make('total_proposta')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('prazo_proposta')
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('parcela_proposta')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('liquido_proposta')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\Select::make('tabela_id')
-                    ->relationship('tabela', 'id')
-                    ->default(null),
-                Forms\Components\TextInput::make('percentual_loja')
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('percentual_agente')
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('percentual_corretor')
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('valor_loja')
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('valor_agente')
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('valor_corretor')
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\Select::make('cliente_id')
-                    ->relationship('cliente', 'id')
-                    ->required(),
-                Forms\Components\Select::make('produto_id')
-                    ->relationship('produto', 'id')
-                    ->required(),
-                Forms\Components\Select::make('financeira_id')
-                    ->relationship('financeira', 'id')
-                    ->required(),
-                Forms\Components\Select::make('correspondente_id')
-                    ->relationship('correspondente', 'id')
-                    ->required(),
-                Forms\Components\Select::make('situacao_id')
-                    ->relationship('situacao', 'id')
-                    ->required(),
-                Forms\Components\Select::make('user_id')
-                    ->relationship('user', 'name')
-                    ->required(),
-            ]);
+                Forms\Components\Section::make([
+                    Forms\Components\Fieldset::make()->schema([
+                        Forms\Components\Select::make('user_id')->label('Agente|Corretor')
+                            ->relationship('user', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                        Forms\Components\Group::make([
+                            Forms\Components\Select::make('cliente_id')
+                                ->relationship('cliente', 'nome', fn(Builder $query) => $query->orderBy('nome')->orderBy('cpf'))
+                                ->searchable(['nome', 'cpf'])
+                                ->preload()
+                                ->required(),
+                        ])->columnSpanFull(),
+                    ])->columns(3),
+                    Forms\Components\Fieldset::make()->schema([
+
+                        Forms\Components\Group::make([
+                            Forms\Components\TextInput::make('uuid')
+                                ->label('UUID')
+                                ->maxLength(50)
+                                ->default(substr(\Ramsey\Uuid\Uuid::uuid4(), 0, 13)),
+                            Forms\Components\TextInput::make('numero_contrato')
+                                ->maxLength(50)
+                                ->default('Não informado'),
+                            Forms\Components\DatePicker::make('data_digitacao')
+                                ->label('Data digitação'),
+                            Forms\Components\DatePicker::make('data_pagamento')
+                                ->label('Data finalização'),
+                        ])->columns(['lg' => 4]),
+
+                        Forms\Components\Group::make([
+                            Forms\Components\TextInput::make('prazo_proposta')
+                                ->numeric()
+                                ->default('0'),
+                            Forms\Components\TextInput::make('total_proposta')
+                                ->prefix('R$')
+                                ->numeric()
+                                ->live()
+                                ->step(0.01)
+                                ->default('0.00'),
+                            Forms\Components\TextInput::make('parcela_proposta')
+                                ->prefix('R$')
+                                ->live()
+                                ->numeric()
+                                ->step(0.01)
+                                ->default('0.00'),
+                            Forms\Components\TextInput::make('liquido_proposta')
+                                ->prefix('R$')
+                                ->live()
+                                ->numeric()
+                                ->step(0.01)
+                                ->default('0.00'),
+
+                            Forms\Components\Select::make('situacao_id')->label('Situação')
+                                ->relationship('situacao', 'descricao_situacao')
+                                ->required(),
+                        ])->columns(['lg' => 5]),
+                    ])
+                        ->columns(1),
+                    Forms\Components\Fieldset::make()->schema([
+                        Forms\Components\Group::make([
+                            Forms\Components\Select::make('organizacao_id')->label('Orgão')
+                                ->relationship('organizacao', 'nome_organizacao')
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+                            Forms\Components\Select::make('produto_id')->label('Produto|Operação')
+                                ->relationship('produto', 'descricao_produto')
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+                            Forms\Components\Select::make('financeira_id')->label('Financeira')
+                                ->relationship('financeira', 'nome_financeira')
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+                            Forms\Components\Select::make('correspondente_id')->label('Correspondente')
+                                ->relationship('correspondente', 'nome_correspondente')
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+                        ])->columns(['lg' => 4])->columnSpanFull(),
+                    ])->columns(1),
+                ]),
+                Forms\Components\Section::make([
+                    Forms\Components\Fieldset::make()->schema([
+                        Forms\Components\Select::make('tabela_id')->label('Tabela')
+                            ->relationship('tabela', 'descricao_codigo')
+                            ->live()
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->afterStateUpdated(function ($state, Forms\Get $get, Forms\Set $set): void {
+                                $tabela = Tabela::whereId($state)->get(['percentual_agente', 'percentual_corretor', 'percentual_loja', 'referencia', 'parcelado'])->toArray()[0];
+                                $calculo = 0.0;
+                                $liquido = $get('liquido_proposta');
+                                $total = ($get('total_proposta'));
+
+                                $p_agente = $tabela['percentual_agente'];
+                                $p_corretor = $tabela['percentual_corretor'];
+                                $p_loja = $tabela['percentual_loja'];
+
+                                $set('percentual_agente', $p_agente);
+                                $set('percentual_corretor', $p_corretor);
+                                $set('percentual_loja', $p_loja);
+
+                                if ($tabela['referencia'] === 'L') {
+                                    $set('valor_agente', calcularValor($liquido, $p_agente));
+                                    $set('valor_corretor', calcularValor($liquido, $p_corretor));
+                                    $set('valor_loja', calcularValor($liquido, $p_loja));
+                                }
+                            })
+                            ->columnSpanFull(),
+
+                        Forms\Components\Group::make([
+                            Forms\Components\TextInput::make('percentual_loja')->label('% Loja')
+                                ->numeric()
+                                ->step(0.01)
+                                ->maxValue(100.00)
+                                ->prefix("%")
+                                ->default('0.00'),
+                            Forms\Components\TextInput::make('valor_loja')->label('R$ Loja ')
+                                ->numeric()
+                                ->step(0.01)
+                                ->maxValue(10000000.00)
+                                ->prefix('R$')
+                                ->default('0.00')
+                        ])->visible(auth()->user()->hasRole(Utils::getSuperAdminName())),
+
+                        Forms\Components\Group::make([
+                            Forms\Components\TextInput::make('percentual_agente')
+                                ->label('% Agente')
+                                ->numeric()
+                                ->step(0.01)
+                                ->maxValue(100.00)
+                                ->prefix("%")
+                                ->default('0.00'),
+                            Forms\Components\TextInput::make('valor_agente')
+                                ->label('R$ Agente')
+                                ->numeric()
+                                ->step(0.01)
+                                ->maxValue(10000000.00)
+                                ->prefix('R$')
+                                ->default(0.00)
+                        ]),
+
+                        Forms\Components\Group::make([
+                            Forms\Components\TextInput::make('percentual_corretor')
+                                ->label('% Corretor')
+                                ->numeric()
+                                ->step(0.01)
+                                ->maxValue(100.00)
+                                ->prefix("%")
+                                ->default('0.00'),
+                            Forms\Components\TextInput::make('valor_corretor')
+                                ->label('R$ Corretor')
+                                ->numeric()
+                                ->live()
+                                ->step(0.01)
+                                ->maxValue(10000000.00)
+                                ->prefix('R$')
+                                ->default('0.00'),
+                        ]),
+
+                    ])->columns(['lg' => 3])
+                ])//section 2
+            ])->columns(1);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('uuid')
-                    ->label('UUID')
+                Tables\Columns\TextColumn::make('user.name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('cliente.nome')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('cliente.cpf')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('numero_contrato')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('data_digitacao')
-                    ->date()
+                    ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('data_pagamento')
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('total_proposta')
-                    ->numeric()
+                    ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('prazo_proposta')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('total_proposta')
+                    ->numeric(decimalPlaces: 2)
+                    ->money('BRL')
+                    ->summarize(summarizers: [
+                        Sum::make('total_proposta')->label('Total Bruto'),
+                        Average::make('liquido_proposta')->label('Média líquido')])
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('parcela_proposta')
-                    ->numeric()
+                    ->money('BRL')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('liquido_proposta')
-                    ->numeric()
+                    ->money('BRL')
+                    ->summarize(summarizers: [
+                        Sum::make('liqudo_proposta')->label('Total Líquido'),
+                        Average::make('liquido_proposta')->label('Média líquido')
+                    ])
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tabela.id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('produto.descricao_produto')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('percentual_loja')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('financeira.nome_financeira')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('percentual_agente')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('correspondente.nome_correspondente')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('percentual_corretor')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('valor_loja')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('valor_agente')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('valor_corretor')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('cliente.id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('produto.id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('financeira.id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('correspondente.id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('situacao.id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('user.name')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                Tables\Columns\TextColumn::make('situacao.descricao_situacao')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -189,4 +276,10 @@ class PropostaResource extends Resource
             'edit' => Pages\EditProposta::route('/{record}/edit'),
         ];
     }
+
+}
+
+function calcularValor($valor, $percentual): float
+{
+    return round(doubleval($valor) * doubleval($percentual) / 100, 2);
 }

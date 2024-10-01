@@ -16,4 +16,9 @@ class EditAgendamento extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function getRedirectUrl(): ?string
+    {
+        return route('filament.admin.resources.agendamentos.index');
+    }
 }

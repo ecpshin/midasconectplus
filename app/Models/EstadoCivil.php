@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class EstadoCivil extends Model
 {
-    protected $table = 'estado_civis';
+    use SoftDeletes;
 
-    protected $fillable = ['estado_civil'];
+    protected $table = 'estado_civis';
 }

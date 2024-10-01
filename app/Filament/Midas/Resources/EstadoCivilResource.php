@@ -16,14 +16,20 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class EstadoCivilResource extends Resource
 {
     protected static ?string $model = EstadoCivil::class;
+    protected static ?string $modelLabel = 'Estado Civil';
+    protected static ?string $pluralModelLabel = 'Estados Civil';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'icon-couple-marriage';
+
+    protected static ?string $navigationGroup = 'Dependências';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                Forms\Components\Section::make('Cadastrar Estado Civil')->schema([
+                    Forms\Components\TextInput::make('estado_civil')->label('Estado Civil')
+                ])
             ]);
     }
 
@@ -31,7 +37,7 @@ class EstadoCivilResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('estado_civil')
             ])
             ->filters([
                 //

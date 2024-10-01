@@ -20,6 +20,7 @@ class AgendamentoResource extends Resource
 
     protected static ?string $navigationIcon = 'icon-calendar-event';
     protected static ?int $navigationSort = 0;
+
     protected static ?string $navigationGroup = "Call Center";
 
     public static function form(Form $form): Form
@@ -57,6 +58,7 @@ class AgendamentoResource extends Resource
                     ->maxLength(255)
                     ->default('Não informado'),
                 Forms\Components\TextInput::make('produto')
+                    ->readOnly()
                     ->maxLength(255)
                     ->default('Não informado'),
                 Forms\Components\Textarea::make('observacoes')

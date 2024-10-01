@@ -17,14 +17,18 @@ class SexoResource extends Resource
 {
     protected static ?string $model = Sexo::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Dependências';
+
+    protected static ?string $navigationIcon = 'icon-venus-mars-solid';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('sexo')
-                    ->maxLength(255),
+                Forms\Components\Section::make([
+                    Forms\Components\TextInput::make('sexo')
+                        ->maxLength(255),
+                ])
             ]);
     }
 
@@ -34,18 +38,6 @@ class SexoResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('sexo')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -71,8 +63,6 @@ class SexoResource extends Resource
     {
         return [
             'index' => Pages\ListSexos::route('/'),
-            'create' => Pages\CreateSexo::route('/create'),
-            'edit' => Pages\EditSexo::route('/{record}/edit'),
         ];
     }
 }

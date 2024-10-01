@@ -24,45 +24,66 @@ class AgendamentoResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('user_id')
-                    ->relationship(name: 'user', titleAttribute: 'name',
-                        modifyQueryUsing: fn(Builder $query)=>$query->whereId(auth()->user()->id))
-                        ->selectablePlaceholder(false),
-                Forms\Components\Select::make('status_id')
-                    ->relationship('status', 'id')
-                    ->default(1),
-                Forms\Components\Select::make('organizacao_id')
-                    ->relationship('organizacao', 'id')
-                    ->default(1),
-                Forms\Components\Select::make('produto_id')
-                    ->relationship('produto', 'id')
-                    ->default(1),
-                Forms\Components\DatePicker::make('data_ligacao'),
-                Forms\Components\DatePicker::make('data_agendamento'),
-                Forms\Components\TextInput::make('nome')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('cpf')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('matricula')
-                    ->maxLength(255)
-                    ->default(000),
-                Forms\Components\TextInput::make('margem')
-                    ->numeric()
-                    ->default(0.000000),
-                Forms\Components\TextInput::make('telefone')
-                    ->tel()
-                    ->maxLength(255)
-                    ->default('(84)9 0000-0000'),
-                Forms\Components\TextInput::make('orgao')
-                    ->maxLength(255)
-                    ->default('Não informado'),
-                Forms\Components\TextInput::make('produto')
-                    ->maxLength(255)
-                    ->default('Não informado'),
+                Forms\Components\Section::make([
+                    Forms\Components\Select::make('user_id')
+                        ->relationship('user', 'name',
+                            modifyQueryUsing: fn(Builder $query): Builder => $query->whereId(auth()->user()->id))
+                        ->selectablePlaceholder(false)
+                        ->default(auth()->user()->id),
+                    Forms\Components\Select::make('status_id')->label('Status')
+                        ->relationship('status', 'status')
+                        ->default(1),
+                    Forms\Components\Select::make('organizacao_id')->label('Órgão')
+                        ->relationship('organizacao', 'nome_organizacao')                    ,
+                    Forms\Components\Select::make('produto_id')->label('Produto oferecido')
+                        ->relationship('produto', 'descricao_produto'),
+                ])->columns(['xl' => 4]),
+                Forms\Components\Section::make([
+                    Forms\Components\DatePicker::make('data_ligacao')
+                        ->label('Data Contato'),
+                    Forms\Components\DatePicker::make('data_agendamento')
+                        ->label('Data agendada'),
+                ])->columns(['xl' => 2]),
+                Forms\Components\Section::make([
+                    Forms\Components\TextInput::make('nome')
+                        ->maxLength(255)
+                        ->columnSpan(['xl' => 3])
+                        ->default(null),
+                    Forms\Components\TextInput::make('cpf')
+                        ->mask('999.999.999-99')
+                        ->maxLength(14)
+                        ->columnSpan(['xl' => 1])
+                        ->default(null),
+                ])->columns(['xl' => 4]),
+                Forms\Components\Section::make([
+                    Forms\Components\TextInput::make('matricula')
+                        ->maxLength(50)
+                        ->default('000000'),
+                    Forms\Components\TextInput::make('margem')
+                        ->numeric()
+                        ->minValue(0.00)
+                        ->maxValue(1000000.00)
+                        ->step(0.00)
+                        ->default('0.00'),
+                    Forms\Components\TextInput::make('telefone')
+                        ->tel()
+                        ->mask('(99)9 9999-9999')
+                        ->maxLength(50)
+                        ->default('(84)9 0000-0000'),
+                    Forms\Components\Group::make([
+                        Forms\Components\TextInput::make('orgao')
+                            ->maxLength(255)
+                            ->readOnly(true)
+                            ->default('N達o informado'),
+                        Forms\Components\TextInput::make('produto')
+                            ->label('Produto sugestionado')
+                            ->readOnly(),
+                    ])->columns(['xl'=>2])->columnSpan(['xl' => 'full']),
                     Forms\Components\Textarea::make('observacoes')
-                    ->columnSpanFull(),
-                ]);
-            }
+                        ->columnSpanFull(),
+                ])->columns(['xl' => 3]),
+            ]);
+    }
 
             public static function table(Table $table): Table
     {

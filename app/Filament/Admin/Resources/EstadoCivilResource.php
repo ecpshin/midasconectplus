@@ -15,13 +15,17 @@ use Filament\Tables\Table;
 class EstadoCivilResource extends Resource
 {
     protected static ?string $model = EstadoCivil::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $modelLabel = 'Estado Civil';
+    protected static ?string $pluralModelLabel = 'Estados Civil';
+    protected static ?string $navigationIcon = 'icon-couple-marriage';
     protected static ?string $navigationGroup = 'Dependências';
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('estado_civil')
+                Forms\Components\Section::make('Cadastrar Estado Civil')->schema([
+                    Forms\Components\TextInput::make('estado_civil')
+                ])
             ]);
     }
 
