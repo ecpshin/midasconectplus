@@ -6,6 +6,7 @@ use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\MenuItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -19,6 +20,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
+use Joaopaulolndev\FilamentEditProfile\Pages\EditProfilePage;
 
 class MidasPanelProvider extends PanelProvider
 {
@@ -30,16 +32,6 @@ class MidasPanelProvider extends PanelProvider
             ->path('midas')
             ->login()
             ->registration()
-            ->plugins([
-                FilamentShieldPlugin::make(),
-                FilamentEditProfilePlugin::make()
-                    ->setIcon('heroicon-s-user')
-                    ->setTitle("Meu Perfil")
-                    ->shouldShowAvatarForm(
-                        value: true,
-                        directory: 'avatars',
-                        rules: 'mimes:jpeg,png|max:8192')
-            ])
             ->colors([
                 'primary' => '#510000',
                 'midas' => '#3f0a56',
@@ -49,11 +41,10 @@ class MidasPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Midas/Pages'), for: 'App\\Filament\\Midas\\Pages')
             ->pages([
                 Pages\Dashboard::class,
-            ])
+                ])
             ->discoverWidgets(in: app_path('Filament/Midas/Widgets'), for: 'App\\Filament\\Midas\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -65,9 +56,27 @@ class MidasPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-            ])
+                ])
             ->authMiddleware([
                 Authenticate::class,
+            ])
+            ->userMenuItems([
+                'profile' => MenuItem::make()
+                    ->label(fn() => auth()->user()->name)
+                    ->url(fn (): string => EditProfilePage::getUrl())
+                    ->icon('heroicon-m-user-circle')
+            
+            ])
+            ->plugins([
+                FilamentEditProfilePlugin::make()
+                    ->setIcon('heroicon-s-user')
+                    ->setTitle("Meu Perfil")
+                    ->setNavigationGroup('Configurações')
+                    ->setSort(100)
+                    ->shouldShowAvatarForm(
+                        value: true,
+                        directory: 'avatars',
+                        rules: 'mimes:jpeg,png|max:8192')
             ])
             ->maxContentWidth('full')
             ->sidebarFullyCollapsibleOnDesktop();

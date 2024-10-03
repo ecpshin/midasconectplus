@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('arquivo_clientes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('cliente_id')->constrained('clientes', 'id')->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('name');
-            $table->string('path');
-            $table->foreignId('cliente_id')->constrained('clientes', 'id')->cascadeOnUpdate()->restrictOnDelete();
+            $table->string('path_url')->nullable();
             $table->timestamps();
         });
     }

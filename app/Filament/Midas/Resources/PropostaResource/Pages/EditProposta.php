@@ -16,4 +16,9 @@ class EditProposta extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function getRedirectUrl(): ?string
+    {
+        return route('filament.midas.resources.propostas.index');
+    }
 }

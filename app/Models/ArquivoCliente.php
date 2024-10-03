@@ -10,10 +10,14 @@ class ArquivoCliente extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'path', 'cliente_id'];
+    protected $table = 'arquivo_clientes';
+
+    protected $casts = [
+        'path_url' => 'array'
+    ];
 
     public function cliente(): BelongsTo
     {
-        return $this->belongsTo(Cliente::class, 'cliente_id', 'id');
+        return $this->belongsTo(Cliente::class);
     }
 }

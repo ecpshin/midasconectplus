@@ -34,16 +34,18 @@ class PropostaResource extends Resource
                 Forms\Components\Section::make([
                     Forms\Components\Fieldset::make()->schema([
                         Forms\Components\Select::make('user_id')->label('Agente|Corretor')
-                            ->relationship('user', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->required(),
+                            ->relationship('user', 'name', fn(Builder $query) => $query->whereId(auth()->id()))
+                            ->required()
+                            ->inlineLabel()
+                            ->default(auth()->id()),
                         Forms\Components\Group::make([
                             Forms\Components\Select::make('cliente_id')
                                 ->relationship('cliente', 'nome', fn(Builder $query) => $query->orderBy('nome')->orderBy('cpf'))
                                 ->searchable(['nome', 'cpf'])
                                 ->preload()
-                                ->required(),
+                                ->required()
+                                ->loadingMessage('Buscando...')
+                                ->noSearchResultsMessage('Cliente não encontrado.'),
                         ])->columnSpanFull(),
                     ])->columns(3),
                     Forms\Components\Fieldset::make()->schema([
@@ -143,23 +145,32 @@ class PropostaResource extends Resource
                                     $set('valor_corretor', calcularValor($liquido, $p_corretor));
                                     $set('valor_loja', calcularValor($liquido, $p_loja));
                                 }
+
+                                if ($tabela['referencia'] === 'B' || $tabela['referencia'] === 'BL' ) {
+                                    $set('valor_agente', calcularValor($liquido, $p_agente));
+                                    $set('valor_corretor', calcularValor($liquido, $p_corretor));
+                                    $set('valor_loja', calcularValor($total, $p_loja));
+                                }
                             })
                             ->columnSpanFull(),
 
                         Forms\Components\Group::make([
+
                             Forms\Components\TextInput::make('percentual_loja')->label('% Loja')
                                 ->numeric()
                                 ->step(0.01)
                                 ->maxValue(100.00)
                                 ->prefix("%")
                                 ->default('0.00'),
+
                             Forms\Components\TextInput::make('valor_loja')->label('R$ Loja ')
                                 ->numeric()
                                 ->step(0.01)
                                 ->maxValue(10000000.00)
                                 ->prefix('R$')
                                 ->default('0.00')
-                        ])->visible(auth()->user()->hasRole(Utils::getSuperAdminName())),
+
+                        ])->hidden(auth()->user()->hasRole(Utils::getSuperAdminName())),
 
                         Forms\Components\Group::make([
                             Forms\Components\TextInput::make('percentual_agente')

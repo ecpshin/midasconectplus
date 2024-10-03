@@ -33,11 +33,14 @@ class ClienteResource extends Resource
                     Forms\Components\TextInput::make('nome')
                         ->required()
                         ->maxLength(255),
+
                     Forms\Components\Group::make([
+
                         Forms\Components\TextInput::make('cpf')
-                            ->required()
-                            ->maxLength(50),
+                            ->mask('999.999.999-99')
+                            ->required(),
                         Forms\Components\DatePicker::make('data_nascimento'),
+
                     ])->columns(['xl'=>2]),
 
                     Forms\Components\Group::make([
@@ -102,20 +105,23 @@ class ClienteResource extends Resource
                         Forms\Components\Textarea::make('observacoes')
                             ->label('Observações')->default(null)
                             ->columnSpanFull(),
+                          
                     ])->columnSpan(['xl' => 'full'])->columns(['xl' => 5]),
-
+                    
                 ])->columns(['xl' => 2]),
 
-                Forms\Components\Section::make('Dados Residenciais')->schema([
+                Forms\Components\Section::make('Dados Residenciais')
+                    ->schema([
                     Forms\Components\Repeater::make('residenciais')->schema([
-                      Forms\Components\TextInput::make('cep'),
-                      Forms\Components\TextInput::make('logradouro'),
-                      Forms\Components\TextInput::make('complemento'),
-                      Forms\Components\TextInput::make('bairro'),
-                      Forms\Components\TextInput::make('localidade'),
-                      Forms\Components\TextInput::make('uf'),
+                        Forms\Components\TextInput::make('cep'),
+                        Forms\Components\TextInput::make('logradouro'),
+                        Forms\Components\TextInput::make('complemento'),
+                        Forms\Components\TextInput::make('bairro'),
+                        Forms\Components\TextInput::make('localidade'),
+                        Forms\Components\TextInput::make('uf'),
                     ])->columns(['xl' => 3]),
-                ])->collapsible()
+
+                ])->collapsible()->collapsed(),
             ]);
     }
 

@@ -16,6 +16,7 @@ class TabelaResource extends Resource
     protected static ?string $model = Tabela::class;
 
     protected static ?string $navigationGroup = 'Principal';
+
     protected static ?string $navigationIcon = 'icon-receipt';
     protected static ?string $navigationParentItem = 'Comissões';
 
@@ -23,31 +24,49 @@ class TabelaResource extends Resource
     {
         return $form
             ->schema([
-
                 Forms\Components\Section::make([
                     Forms\Components\Fieldset::make()->schema([
 
                         Forms\Components\Group::make([
 
-                            Forms\Components\Select::make('produto_id')
+                            Forms\Components\Select::make('produto_id')->label('Produto')
                                 ->relationship('produto', 'descricao_produto')
                                 ->searchable()
-                                ->preload(),
+                                ->preload()
+                                ->createOptionForm([
+                                    Forms\Components\TextInput::make('descricao_produto')
+                                        ->label("Descrição do Produto")
+                                        ->required()
+                                        ->maxLength(255)
+                                ]),
 
-                            Forms\Components\Select::make('financeira_id')
+                            Forms\Components\Select::make('financeira_id')->label("Financeira")
                                 ->relationship('financeira', 'nome_financeira')
                                 ->searchable()
-                                ->preload(),
+                                ->preload()
+                                ->createOptionForm([
+                                    Forms\Components\TextInput::make('nome_financeira')->label('Nome Financeira')
+                                ]),
 
-                            Forms\Components\Select::make('correspondente_id')
+                            Forms\Components\Select::make('correspondente_id')->label('Correspondente')
                                 ->relationship('correspondente', 'nome_correspondente')
                                 ->searchable()
-                                ->preload(),
+                                ->preload()
+                                ->createOptionForm([
+                                    Forms\Components\Section::make([
+                                        Forms\Components\TextInput::make('nome_correspondente')->label('Nome Correspondente')
+                                    ])
+                                ]),
 
-                            Forms\Components\Select::make('organizacao_id')
+                            Forms\Components\Select::make('organizacao_id')->label('Organização|Órgão')
                                 ->relationship('organizacao', 'nome_organizacao')
                                 ->searchable()
                                 ->preload()
+                                ->createOptionForm([
+                                    Forms\Components\Section::make([
+                                        Forms\Components\TextInput::make('nome_organizacao')->label('Nome Organização'),
+                                    ])
+                                ]),
 
                         ])->columns(['lg' => 4])->columnSpan(['lg' => 'full']),
 
@@ -94,11 +113,11 @@ class TabelaResource extends Resource
                                         'B' => 'Bruto',
                                         'BL' => 'Bruto|Liquido',
                                         'L' => 'Líquido',
-                                    ]),
+                                    ])->default('L'),
 
                                 Forms\Components\Toggle::make('parcelado')
                                     ->label('Comissão Parcelada')
-                                    ->inlineLabel(false)
+                                    ->inlineLabel()
                                     ->default(false),
                             ]),
 
@@ -118,6 +137,7 @@ class TabelaResource extends Resource
                                     ->maxValue(100.00)
                                     ->suffix('%')
                                     ->default('0,00'),
+
                                 Forms\Components\TextInput::make('percentual_corretor')
                                     ->numeric()
                                     ->step(0.01)
@@ -130,7 +150,7 @@ class TabelaResource extends Resource
 
                             Forms\Components\Group::make([
 
-                                Forms\Components\TextInput::make('bonus')
+                                Forms\Components\TextInput::make('bonus')->label('Bônus')
                                     ->numeric()->step(0.01)
                                     ->minValue(0.00)
                                     ->maxValue(100.00)
@@ -139,12 +159,10 @@ class TabelaResource extends Resource
 
                             ])
 
-
                         ])->columns(['lg' => 4])->columnSpan(['lg' => 'full']),
 
                     ]),
-                ])
-
+                ]),
             ]);
     }
 
@@ -154,20 +172,17 @@ class TabelaResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('produto.descricao_produto')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('financeira.nome_financeira')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('correspondente.nome_correspondente')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('organizacao.nome_organizacao')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('descricao')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('codigo')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('prazo')
+                Tables\Columns\TextColumn::make('prazo'),
+                Tables\Columns\TextColumn::make('financeira.nome_financeira')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('correspondente.nome_correspondente')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('organizacao.nome_organizacao')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\IconColumn::make('parcelado')
                     ->boolean()
@@ -175,34 +190,15 @@ class TabelaResource extends Resource
                 Tables\Columns\TextColumn::make('referencia')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('percentual_loja')
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('bonus')
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('percentual_diferido')
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('percentual_agente')
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('percentual_corretor')
-                    ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('descricao_codigo')
-                    ->searchable(),
             ])
             ->filters([
                 //

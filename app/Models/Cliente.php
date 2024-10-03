@@ -38,10 +38,17 @@ class Cliente extends Model
         return $this->hasMany(Vinculo::class, 'cliente_id', 'id');
     }
 
+    public function arquivos(): HasMany
+    {
+        return $this->hasMany(ArquivoCliente::class);
+    }
+
     public function infoResidencial(): HasOne
     {
         return $this->hasOne(InfoResidencial::class, 'cliente_id', 'id');
     }
+
+
 
     public function propostas(): HasMany
     {
